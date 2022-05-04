@@ -1,0 +1,72 @@
+---
+title: "Projeto_Final"
+author: "Camila Totti"
+date: "20/01/2022"
+objetivos: gerar um mapa e um gráfico com os dados geomorfológicos da região costeira dos estados do RJ, ES e SP.
+output: html_document
+---
+
+```{r INSTALACAO PACOTES UTEIS}
+install.packages('sf')
+install.packages('raster')
+install.packages('dplyr')
+install.packages('spData')
+install.packages('leaflet')
+install.packages('mapview')
+install.packages('geobr')
+install.packages('rio')
+install.packages('ggplot2')
+install.packages('rgeos')
+install.packages('ggspatial')
+install.packages('viridis')
+install.packages('rgdal')
+install.packages('rnaturalearth')
+install.packages('rnaturalearthdata')
+```
+
+```{r CARREGANDO PACOTES UTEIS}
+library('sf')
+library('raster')
+library('dplyr')
+library('spData') !
+library('leaflet')
+library('mapview') !
+library('geobr')
+library('rio')
+library('ggplot2')
+library('rgeos')
+library('ggspatial')
+library('viridis')
+library('rgdal')
+library('rnaturalearth')
+library('rnaturalearthdata')
+```
+
+```{r IMPORTANDO E FILTRANDO DADOS DOS ESTADOS BR}
+estados_br <- read_state(code_state = "all", year = 2019, simplified = TRUE) 
+
+estados_selec <- filter(estados_br,name_region=="Sudeste")
+RJ_ES_SP <- estados_selec[-1,]
+
+```
+
+```{r IMPORTANDO E LENDO DADOS GEOMORF BR DO IBGE}
+zc_br_geomorfologia_ibge <- readOGR("~/Geografia/Disciplinas/Mapeamento Costeiro - Bulhões/R MAPEAMENTO COSTEIRO/Trabalho Final/zc_br_geomorfologia_ibge/zc_br_geom_area.shp")
+zc_br_geomorfologia_ibge <- st_as_sf(zc_br_geomorfologia_ibge)
+
+```
+
+```{r MAPEANDO OS DADOS DE GEOMORF BR}
+# coord_sf(xlim = c(-55,-35), ylim = c(-27,-15), expand = FALSE)
+
+
+tiff("map_zc_br_geomorfologia_ibge.tiff", units = "in", width = 15, height = 10, res = 300)
+
+map_zc_br_geomorfologia_ibge <- ggplot() + geom_sf(data = RJ_MG_SP, size=0.1, fill="gray85") + geom_sf(data = zc_br_geomorfologia_ibge) + coord_sf(xlim = c(-58,-39), ylim = c(-27,-15), expand = FALSE)
+map_zc_br_geomorfologia_ibge
+
+map_zc_br_geomorfologia_ibge <- ggplot() + geom_sf(data = RJ_MG_SP, size=0.1, fill="gray85") + geom_sf(data = zc_br_geomorfologia_ibge, aes(fill=letra_simb), size=0.001, na.omit=TRUE) + theme(legend.position = "right", legend.text = element_text(size=9), legend.title = element_blank()) + scale_fill_viridis_d(labels=c("Ade-Duna","Afm-Planície flúviomarinha", "Ai-Planície de Inundação", "Ape-Planície Eólica", "Apf-Planície Fluvial", "Apfl-Planície fluviolacustre", "Apfm-Planície fluviomarinha", "Apl-Planície lacustre", "Aplg-Planície lagunar", "Apm-Planície marinha", "Aptf-Planície e terraço fluvial", "Arc-Rampa de colúvio", "Atf-Terraço fluvial", "Atfl-Terraço fluviolacustre", "Atfm-Terraço fluviomarinho", "Atlg-Terraço lagunar", "Atm-Terraço Marinho", "Da-Dissecação homogênea aguçada", "Dc-Dissecação homogênea convexa", "DEa-Dissecação Estrutural aguçada", "DEc-Dissecação estrutural convexa", "Dei-Encosta ingreme de erosão", "Dir-Ilha rochosa", "Dr-Dissecação em ravinas", "Dt-Dissecação homogênea tabular", "Pgi-Pediplano degradado inumado", "Pgu-Pediplano degradado desnudado", "Pri-Pediplano retocado inumado", "Pru-Pediplano retocado desnudado"), direction = -1) + xlab("Longitude") + ylab("Latitude") + theme(panel.grid.major = element_line(color = gray(0.5), linetype = "dashed", size = 0.2), panel.background = element_rect(fill = "aliceblue")) + annotation_scale(location="br", pad_y = unit(0.7,"cm"), width_hint = 0.5, bar_cols = c("grey", "white"), line_width = 0.5, text_pad = unit(0.05, "cm")) + annotation_north_arrow(location="br", which_north = "true", pad_x = unit(0.1, "in"), pad_y = unit(0.4, "in"), style = north_arrow_fancy_orienteering) + coord_sf(xlim = c(-55,-35), ylim = c(-27,-15), expand = FALSE) + geom_sf_text(data=estados_br,aes(label=abbrev_state), colour="grey99", size=2.5) + ggtitle("Municípios da Zona Costeira Brasileira", subtitle = "Modelados da Geomorfologia Brasileira, IBGE")
+map_zc_br_geomorfologia_ibge
+
+```
+
