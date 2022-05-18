@@ -1,2 +1,2 @@
 # Map-Costeiro-com-R
-DESCRIÇÃO
+Arquivos das aulas de Mapeamento Costeiro com linguagem R.
